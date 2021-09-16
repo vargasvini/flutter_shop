@@ -1,51 +1,53 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_shop/models/product.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class ProductsProvider with ChangeNotifier {
   //List<Product> loadedProducts = ProductListMock.loadedProducts;
-  static List<Product> _items = [
-    new Product(
-        id: "p1",
-        title: "Produto 1",
-        description: "Descrição do produto 1",
-        price: 1.99,
-        imageUrl:
-            "https://www.prada.com/content/dam/pradanux_products/S/SPH/SPH109/1WQ8F0002/SPH109_1WQ8_F0002_S_211_SLF.png"),
-    new Product(
-        id: "p2",
-        title: "Produto 1",
-        description: "Descrição do produto 1",
-        price: 1.99,
-        imageUrl:
-            "https://www.prada.com/content/dam/pradanux_products/S/SPH/SPH109/1WQ8F0002/SPH109_1WQ8_F0002_S_211_SLF.png"),
-    new Product(
-        id: "p3",
-        title: "Produto 1",
-        description: "Descrição do produto 1",
-        price: 1.99,
-        imageUrl:
-            "https://www.prada.com/content/dam/pradanux_products/S/SPH/SPH109/1WQ8F0002/SPH109_1WQ8_F0002_S_211_SLF.png"),
-    new Product(
-        id: "p4",
-        title: "Produto 1",
-        description: "Descrição do produto 1",
-        price: 1.99,
-        imageUrl:
-            "https://www.prada.com/content/dam/pradanux_products/S/SPH/SPH109/1WQ8F0002/SPH109_1WQ8_F0002_S_211_SLF.png"),
-    new Product(
-        id: "p5",
-        title: "Produto 1",
-        description: "Descrição do produto 1",
-        price: 1.99,
-        imageUrl:
-            "https://www.prada.com/content/dam/pradanux_products/S/SPH/SPH109/1WQ8F0002/SPH109_1WQ8_F0002_S_211_SLF.png"),
-    new Product(
-        id: "p6",
-        title: "Produto 1",
-        description: "Descrição do produto 1",
-        price: 1.99,
-        imageUrl:
-            "https://www.prada.com/content/dam/pradanux_products/S/SPH/SPH109/1WQ8F0002/SPH109_1WQ8_F0002_S_211_SLF.png"),
+  List<Product> _items = [
+    // new Product(
+    //     id: "p1",
+    //     title: "Produto 1",
+    //     description: "Descrição do produto 1",
+    //     price: 1.99,
+    //     imageUrl:
+    //         "https://www.prada.com/content/dam/pradanux_products/S/SPH/SPH109/1WQ8F0002/SPH109_1WQ8_F0002_S_211_SLF.png"),
+    // new Product(
+    //     id: "p2",
+    //     title: "Produto 1",
+    //     description: "Descrição do produto 1",
+    //     price: 1.99,
+    //     imageUrl:
+    //         "https://www.prada.com/content/dam/pradanux_products/S/SPH/SPH109/1WQ8F0002/SPH109_1WQ8_F0002_S_211_SLF.png"),
+    // new Product(
+    //     id: "p3",
+    //     title: "Produto 1",
+    //     description: "Descrição do produto 1",
+    //     price: 1.99,
+    //     imageUrl:
+    //         "https://www.prada.com/content/dam/pradanux_products/S/SPH/SPH109/1WQ8F0002/SPH109_1WQ8_F0002_S_211_SLF.png"),
+    // new Product(
+    //     id: "p4",
+    //     title: "Produto 1",
+    //     description: "Descrição do produto 1",
+    //     price: 1.99,
+    //     imageUrl:
+    //         "https://www.prada.com/content/dam/pradanux_products/S/SPH/SPH109/1WQ8F0002/SPH109_1WQ8_F0002_S_211_SLF.png"),
+    // new Product(
+    //     id: "p5",
+    //     title: "Produto 1",
+    //     description: "Descrição do produto 1",
+    //     price: 1.99,
+    //     imageUrl:
+    //         "https://www.prada.com/content/dam/pradanux_products/S/SPH/SPH109/1WQ8F0002/SPH109_1WQ8_F0002_S_211_SLF.png"),
+    // new Product(
+    //     id: "p6",
+    //     title: "Produto 1",
+    //     description: "Descrição do produto 1",
+    //     price: 1.99,
+    //     imageUrl:
+    //         "https://www.prada.com/content/dam/pradanux_products/S/SPH/SPH109/1WQ8F0002/SPH109_1WQ8_F0002_S_211_SLF.png"),
   ];
   //List<Product> loadedProducts = [];
   var showFavoritesOnly = false;
@@ -61,21 +63,65 @@ class ProductsProvider with ChangeNotifier {
     return [..._items];
   }
 
+  Future<void> fetchAndSetProducts() async {
+    final url = Uri.parse(
+        "https://flutter-app-teste-b15b9-default-rtdb.firebaseio.com/products.json");
+    try {
+      final response = await http.get(url);
+      final extractedData = json.decode(response.body) as Map<String, dynamic>;
+      final List<Product> loadedProducts = [];
+      extractedData.forEach((prodId, prodData) {
+        loadedProducts.add(Product(
+            id: prodId,
+            title: prodData['title'],
+            description: prodData['description'],
+            price: prodData['price'],
+            imageUrl: prodData['imageUrl'],
+            isFavorite: prodData['isFavorite']));
+      });
+      _items = loadedProducts;
+    } catch (e) {
+      throw e;
+    }
+    notifyListeners();
+  }
+
   List<Product> get favoriteItems {
     return [..._items].where((prod) => prod.isFavorite).toList();
   }
 
-  void addProduct(Product product) {
-    final newProduct = Product(
-      id: DateTime.now().toString(),
-      title: product.title,
-      description: product.description,
-      price: product.price,
-      imageUrl: product.imageUrl,
-      isFavorite: product.isFavorite,
-    );
-    _items.add(newProduct);
-    notifyListeners();
+  Future<void> addProduct(Product product) {
+    final url = Uri.parse(
+        "https://flutter-app-teste-b15b9-default-rtdb.firebaseio.com/products.json");
+    return http
+        .post(
+      url,
+      body: json.encode({
+        'title': product.title,
+        'description': product.description,
+        'imageUrl':
+            "https://www.prada.com/content/dam/pradanux_products/S/SPH/SPH109/1WQ8F0002/SPH109_1WQ8_F0002_S_211_SLF.png",
+        'price': product.price,
+        'isFavorite': product.isFavorite
+      }),
+    )
+        .then(
+      (response) {
+        final newProduct = Product(
+          id: DateTime.now().toString(),
+          title: product.title,
+          description: product.description,
+          price: product.price,
+          imageUrl:
+              "https://www.prada.com/content/dam/pradanux_products/S/SPH/SPH109/1WQ8F0002/SPH109_1WQ8_F0002_S_211_SLF.png",
+          isFavorite: product.isFavorite,
+        );
+        _items.add(newProduct);
+        notifyListeners();
+      },
+    ).catchError((error) {
+      throw error;
+    });
   }
 
   Product getProductById(String id) {
