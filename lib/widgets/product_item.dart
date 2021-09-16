@@ -9,7 +9,6 @@ class ProductItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final product = Provider.of<Product>(context, listen: false);
     final cart = Provider.of<CartProvider>(context, listen: false);
-    print('buiiiiiiiiiild');
     return ClipRRect(
       borderRadius: BorderRadius.circular(10),
       child: GridTile(
@@ -44,7 +43,7 @@ class ProductItem extends StatelessWidget {
               Icons.shopping_bag,
             ),
             onPressed: () => {
-              cart.addItem(product.id, product.price, product.title),
+              cart.addItem(product.id!, product.price, product.title),
               ScaffoldMessenger.of(context).hideCurrentSnackBar(),
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
@@ -52,7 +51,7 @@ class ProductItem extends StatelessWidget {
                   behavior: SnackBarBehavior.fixed,
                   action: SnackBarAction(
                     onPressed: () => {
-                      cart.removeSingleItem(product.id),
+                      cart.removeSingleItem(product.id!),
                     },
                     label: 'DESFAZER',
                     textColor: Colors.black,

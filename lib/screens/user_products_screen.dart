@@ -15,10 +15,10 @@ class UserProductsScreen extends StatelessWidget {
         title: const Text('Your Products'),
         actions: [
           IconButton(
-              icon: Icon(Icons.add),
-              onPressed: () => {
-                    Navigator.of(context).pushNamed(ProductFormScreen.routeName)
-                  }),
+            icon: Icon(Icons.add),
+            onPressed: () =>
+                {Navigator.of(context).pushNamed(ProductFormScreen.routeName)},
+          ),
         ],
       ),
       body: Padding(
@@ -28,6 +28,7 @@ class UserProductsScreen extends StatelessWidget {
           itemBuilder: (ctx, i) => Column(
             children: [
               UserProductItem(
+                id: productsProvider.items[i].id!,
                 title: productsProvider.items[i].title,
                 imageUrl: productsProvider.items[i].imageUrl,
               ),
