@@ -21,13 +21,36 @@ class CartItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    bool confirmDismiss = false;
     final cartProvider =
         Provider.of<CartProvider.CartProvider>(context, listen: false);
     return Dismissible(
       key: ValueKey(id),
       direction: DismissDirection.endToStart,
       onDismissed: (direction) => {cartProvider.removeItem(productId)},
-      //confirmDismiss: ,
+      confirmDismiss: (direction) {
+        return showDialog(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            title: Text('Tem certeza?'),
+            content: Text('Deseja remover o item do carrinho?'),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop(true);
+                },
+                child: Text('Sim'),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop(false);
+                },
+                child: Text('Não'),
+              )
+            ],
+          ),
+        );
+      },
       background: Container(
         color: Theme.of(context).errorColor,
         child: Icon(
@@ -50,7 +73,7 @@ class CartItem extends StatelessWidget {
                   child: FittedBox(child: Text(price.toString()))),
             ),
             title: Text(title),
-            subtitle: Text('Total: \$${(price * quantity)}'),
+            subtitle: Text('Total: \$${(price * quantity).toStringAsFixed(2)}'),
             trailing: Container(
                 alignment: Alignment.center,
                 width: double.parse("150"),
@@ -61,7 +84,7 @@ class CartItem extends StatelessWidget {
                   children: [
                     TextButton(
                         onPressed: () =>
-                            cartProvider.removeItemQtd(productId, price, title),
+                            cartProvider.removeSingleItem(productId),
                         child: Icon(Icons.remove)),
                     Text('${quantity.toString()}x'),
                     TextButton(
